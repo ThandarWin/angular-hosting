@@ -1,0 +1,28 @@
+ SELECT ca.Accountid,ca.AccountNumber,
+	dbo.CheckHardwareFlagsCount(ca.AccountId) AS HardwareFlagsCount,
+	dbo.CheckSoftwareFlagsCount(ca.AccountId) AS SoftwareFlagsCount
+	From CustomerAccounts ca
+
+============================
+
+
+CREATE FUNCTION dbo.CheckHardwareCount
+(
+    @AccountID uniqueidentifier
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Result INT;
+
+    -- Count the IsHardware entries
+    SELECT @Result = CASE 
+                        WHEN COUNT(soi.IsHardware) > 0 THEN 1 
+                        ELSE 0 
+                     END
+    FROM SaleOrderItems soi
+    LEFT JOIN SaleOrders so ON so.OrderID = soi.OrderID
+    WHERE soi.IsHardware = 1 AND so.AccountID = @AccountID;
+
+    RETURN @Result;
+END;
