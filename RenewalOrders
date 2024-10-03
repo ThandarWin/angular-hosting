@@ -1,0 +1,48 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        var renewalOrders = new List<RenewalOrder>
+        {
+            new RenewalOrder { RenewalId = "R001", RenewalName = "Renewal A", Status = "active", Type = "Type A", OwnerName = "Owner 1", EstimatedValue = 1000, ItemDescription = "Item 1", ProductCode = "P001", Supplier = "Supplier X", Manufacturer = "Manufacturer Y", ProductType = "Type A", Quantity = 10 },
+            new RenewalOrder { RenewalId = "R001", RenewalName = "Renewal A", Status = "active", Type = "Type A", OwnerName = "Owner 1", EstimatedValue = 1000, ItemDescription = "Item 2", ProductCode = "P002", Supplier = "Supplier Z", Manufacturer = "Manufacturer W", ProductType = "Type B", Quantity = 5 },
+            new RenewalOrder { RenewalId = "R002", RenewalName = "Renewal B", Status = "inactive", Type = "Type B", OwnerName = "Owner 2", EstimatedValue = 2000, ItemDescription = "Item 3", ProductCode = "P003", Supplier = "Supplier X", Manufacturer = "Manufacturer Y", ProductType = "Type C", Quantity = 2 }
+        };
+
+        var groupedRenewals = renewalOrders
+            .GroupBy(order => order.RenewalId)
+            .Select(group => new Renewal
+            {
+                RenewalId = group.Key,
+                // Use the first order's values for the remaining properties
+                RenewalName = group.First().RenewalName,
+                Status = group.First().Status,
+                Type = group.First().Type,
+                OwnerName = group.First().OwnerName,
+                EstimatedValue = group.First().EstimatedValue,
+                Items = group.Select(item => new RenewalItem
+                {
+                    ItemDescription = item.ItemDescription,
+                    ProductCode = item.ProductCode,
+                    Supplier = item.Supplier,
+                    Manufacturer = item.Manufacturer,
+                    ProductType = item.ProductType,
+                    Quantity = item.Quantity
+                }).ToList()
+            }).ToList();
+
+        // Output the results
+        foreach (var renewal in groupedRenewals)
+        {
+            Console.WriteLine($"Renewal ID: {renewal.RenewalId}, Name: {renewal.RenewalName}, Status: {renewal.Status}, Owner: {renewal.OwnerName}, Estimated Value: {renewal.EstimatedValue}");
+            foreach (var item in renewal.Items)
+            {
+                Console.WriteLine($"  - Item Description: {item.ItemDescription}, Product Code: {item.ProductCode}, Supplier: {item.Supplier}, Manufacturer: {item.Manufacturer}, Product Type: {item.ProductType}, Quantity: {item.Quantity}");
+            }
+        }
+    }
+}
